@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	db "database/sql"
 	"log"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
@@ -25,32 +26,42 @@ func isUserMakingPrediction(userID int, db *db.DB) bool {
 	return err != sql.ErrNoRows
 }
 
+func submitPrediction(message tgbotapi.Message, db *db.DB, bot tgbotapi.BotAPI) {
+
+	db.Query("DELETE prediction_in_progress WHERE userid=$1", message.From.ID)
+	msg := tgbotapi.NewMessage(message.Chat.ID, "Submitted prediction")
+	bot.Send(msg)
+
+}
+
+//Handler main point of entry for handlers
 func Handler(bot tgbotapi.BotAPI, update tgbotapi.Update, db *db.DB) {
+
 	print("Handling bot api")
-	log.Printf("Is user making prediction %t")
+	log.Printf("Is user making prediction %t", isUserMakingPrediction(update.Message.From.ID, db))
 
-	if isUserMakingPrediction(update.Message.From.ID, db) {
+	if update.Message.IsCommand() {
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
+		switch update.Message.Command() {
+		case "start":
+			msg.Text = "Starting message"
+			bot.Send(msg)
+		case "predict":
+			startPrediction(bot, update, db)
 
+			/* for rows.Next() {
+				prediction := redbook.CreatingPrediction{}
+				rows.Scan(&prediction.UserId)
+				println("userid: " + strconv.Itoa(prediction.UserId))
+			} */
+
+		default:
+			msg.Text = "Unknown command"
+			bot.Send(msg)
+		}
 	} else {
-		if update.Message.IsCommand() {
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
-			switch update.Message.Command() {
-			case "start":
-				msg.Text = "Starting message"
-				bot.Send(msg)
-			case "predict":
-				startPrediction(bot, update, db)
-
-				/* for rows.Next() {
-					prediction := redbook.CreatingPrediction{}
-					rows.Scan(&prediction.UserId)
-					println("userid: " + strconv.Itoa(prediction.UserId))
-				} */
-
-			default:
-				msg.Text = "Unknown command"
-				bot.Send(msg)
-			}
+		if isUserMakingPrediction(update.Message.From.ID, db) {
+			submitPrediction(*update.Message, db, bot)
 		}
 	}
 

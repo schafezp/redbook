@@ -17,7 +17,7 @@ func main() {
 		log.Panic("Bot token not found")
 	}
 
-	connStr := "user=pqgotest dbname=pqgotest password=pqgotest port=5431 sslmode=disable"
+	connStr := "user=pqgotest dbname=pqgotest password=pqgotest port=5432 sslmode=disable"
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		log.Panic(err)

@@ -7,10 +7,14 @@ services:
     image: postgres
     restart: always
     ports:
-      - 5431:5432
+      - 5432:5432
     environment:
       POSTGRES_PASSWORD: pqgotest
       POSTGRES_USER: pqgotest
+      POSTGRES_DB: pqgotest
+    volumes:
+      - ./init-user-db.sh:/docker-entrypoint-initdb.d/init-user-db.sh
+
 
   adminer:
     image: adminer

@@ -4,8 +4,6 @@ import (
 	"database/sql"
 	db "database/sql"
 	"log"
-	"redbook"
-
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
@@ -31,7 +29,7 @@ func Handler(bot tgbotapi.BotAPI, update tgbotapi.Update, db *db.DB) {
 	print("Handling bot api")
 	log.Printf("Is user making prediction %t")
 
-	if redbook.isUserMakingPrediction(update.Message.From.ID, db) {
+	if isUserMakingPrediction(update.Message.From.ID, db) {
 
 	} else {
 		if update.Message.IsCommand() {
